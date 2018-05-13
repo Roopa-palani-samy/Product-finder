@@ -1,0 +1,123 @@
+#KNN implementation for datasets 
+install.packages('class')
+library(class)
+install.packages('gmodels')
+library(gmodels)
+library(ggvis)
+install.packages('FNN')
+library(FNN)
+install.packages('dummies')
+library(dummies)
+install.packages('caret')
+library(caret)
+install.packages('scales')
+library(scales)
+install.packages('Metrics')
+library(Metrics)
+prc<-Training_data
+prc
+table(prc$ProfitMargin)
+prc_train<-prc[1:23,]
+prc_train
+prc_test<-predict_profit_margin
+prc_test
+prc_train_labels=Training_data$ProfitMargin
+prc_train_labels
+prc_test_lables<-predict_profit_margin$ProfitMargin
+prc_test_lables
+#pre<-function
+prc_test_pred <- knn.reg(train = prc_train, test = prc_test,Training_data$ProductModelNo, k=1)
+Z<-prc_test_pred["pred"]
+Z
+y<-unlist(Z,use.names = FALSE)
+y
+class(y)
+class(Z)
+#CrossTable(x=prc_test_lables,y=prc_test_pred,prop.chisq=FALSE)
+class(prc_test_lables)
+#predictiing Model accuracy
+accuracy_value<-rmse(prc_test_lables,y)
+#help("set")
+ncluster<-3
+kkkmean<-kmeans(Training_data$ProfitMargin,ncluster)
+kkkmean
+s<-kkkmean["cluster"]
+s
+s[[1]]
+class(s)
+s<-unlist(s)
+s
+cen<-kkkmean["centers"]
+cen
+class(cen)
+cent<-cen$centers[,1]
+cent
+class(cent)
+tot<-kkkmean["iter"]
+tot
+s
+product_id<-NULL
+product_id_grp<-NULL
+user_needed_value<-3
+grp_productid_on_cluster<-function()
+{  
+  for(j in 1:ncluster)
+  {
+  for (i in 1:length(s))
+    {
+         if(s[i]==j)
+         {
+           product_id<-c(product_id,i)
+         }
+  }
+    #product_id
+    product_id_grp<-c(product_id_grp,list(product_id))
+    product_id<-NULL
+  }
+
+  return(product_id_grp)
+}
+product_id_grps<-grp_productid_on_cluster()
+product_id_grps
+Flag<-0
+#pred_nearset<- knn.reg(train =cent , test = user_needed_value,cent,k=0)
+Retrieve_products_id<-function()
+{
+  if(user_needed_value<=cen$centers[1])
+  {
+    product_id_grps[[1]][]
+    return (product_id_grps[[1]][])
+  }
+  if(user_needed_value<=cen$centers[2])
+  {
+    product_id_grps[[2]][]
+     return (product_id_grps[[2]][])
+  }
+  if(user_needed_value<=cen$centers[3])
+  {
+    product_id_grps[[3]][]
+    return (product_id_grps[[3]][])
+  }
+  print(paste("Sorry,No values matched"))
+  Flag<-1
+}
+imp<-Retrieve_products_id()
+imp
+#Retrieve the products id that give user needed margin,products 
+user_output<-function(imp)
+{
+  for(i in imp)
+  {
+    print(paste("The products which can fetch ",i))
+    print(paste("The selling cost",Training_data$SellingCost[i]))
+    print(paste("Fixed service cost",Training_data$FixedServiceCost[i]))
+    print(paste("service cost",Training_data$FixedServiceCost[i]*Training_data$WarrantyPeriod[i]))
+    print(paste( "                         "))
+  }
+  
+}
+if(Flag==0)
+{
+user_output(imp)
+}
+print(paste("ERROR VALUE",accuracy_value))
